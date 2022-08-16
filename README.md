@@ -2,6 +2,16 @@
 
 Fetches [Insights Summary](https://circleci.com/docs/api/v2/index.html#operation/getProjectWorkflowsPageData) data from Circle CI using the V2 API.
 
+## Usage
+
+```yaml
+- name: Fetch Circle CI Insights Summary
+  uses: jpdillingham/circleci-insights-summary@v1
+  with:
+    api-key: ${{ secrets.CIRCLE_CI_API_KEY }}
+    project-slug: github/my-cool-repo
+    reporting-window: last-24-hours
+```
 
 ## Why do this?
 
@@ -100,3 +110,4 @@ And then it flattens and groups the data for output like:
 'circleci.project_2.trends.success_rate': 26
 ```
 
+Alternatively, the entire flattened object is output as JSON in `circleci.summary.json`.
