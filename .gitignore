@@ -80,7 +80,7 @@ typings/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+# dist // GitHub actions must be runnable as is
 
 # Gatsby files
 .cache/
