@@ -1,78 +1,98 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import core from '@actions/core';
 import github from '@actions/github';
 import fetch from 'node-fetch';
 
-const data = {
-  "org_data" : {
-    "trends" : {
-      "success_rate" : 1.00,
-      "total_credits_used" : 2.00,
-      "throughput" : 3.00,
-      "total_duration_secs" : 4.00,
-      "total_runs" : 5.00
-    },
-    "metrics" : {
-      "success_rate" : 6.00,
-      "total_credits_used" : 7,
-      "throughput" : 8.00,
-      "total_duration_secs" : 9,
-      "total_runs" : 10
-    }
-  },
-  "all_projects" : [ "project_1", "project_2" ],
-  "org_project_data" : [ {
-    "metrics" : {
-      "total_credits_used" : 11,
-      "total_duration_secs" : 12,
-      "total_runs" : 13,
-      "success_rate" : 14.00
-    },
-    "trends" : {
-      "total_credits_used" : 15.00,
-      "total_duration_secs" : 16.00,
-      "total_runs" : 17.00,
-      "success_rate" : 18.00
-    },
-    "project_name" : "project_1"
-  }, {
-    "metrics" : {
-      "total_credits_used" : 19,
-      "total_duration_secs" : 20,
-      "total_runs" : 21,
-      "success_rate" : 22.00
-    },
-    "trends" : {
-      "total_credits_used" : 23.00,
-      "total_duration_secs" : 24.00,
-      "total_runs" : 25.00,
-      "success_rate" : 26.00
-    },
-    "project_name" : "project_2"
-  } ]
+class HTTPResponseError extends Error {
+	constructor(response, ...args) {
+    super(`HTTP Error Response: ${response.status} ${response.statusText}`, ...args);
+		this.response = response;
+	}
 }
 
-const flatten = (object = {}, result = {}, path = '') => {
+const flatten = ({ object = {}, result = {}, path = '' }) => {
   for (const [key, value] of Object.entries(object)) {
     if (typeof value === 'object' && value != null) {
-      flatten(value, result, `${path}${key}.`);
+      flatten({ object: value, result, path: `${path}${key}.` });
     } else {
       result[path + key] = value;
     };
   };
-
+  
   return result;
 };
 
-var project_data = data.org_project_data.reduce((acc, { project_name, metrics, trends }) => {
-  acc[project_name] = { metrics, trends }
-  return acc;
-}, {});
+(async () => {
+  try {
+    const {
+      CIRCLE_CI_INSIGHTS_SUMMARY_API_KEY,
+      CIRCLE_CI_INSIGHTS_SUMMARY_PROJECT_SLUG,
+      CIRCLE_CI_INSIGHTS_SUMMARY_REPORTING_WINDOW,
+      CIRCLE_CI_INSIGHTS_SUMMARY_DEBUG,
+    } = process.env;
+  
+    const apiKey = core.getInput('api-key') || CIRCLE_CI_INSIGHTS_SUMMARY_API_KEY;
+    const projectSlug = core.getInput('project-slug') || CIRCLE_CI_INSIGHTS_SUMMARY_PROJECT_SLUG;
+    const reportingWindow = core.getInput('reporting-window') || CIRCLE_CI_INSIGHTS_SUMMARY_REPORTING_WINDOW || 'last-24-hours';
 
-var flattened_data = flatten({ 
-  circleci: {
-    org_data: data.org_data, 
-    ...project_data 
+    if (!apiKey || !projectSlug || !reportingWindow) {
+      throw new Error('Missing one or more required parameters');
+    }
+  
+    const url = `https://circleci.com/api/v2/insights/${projectSlug}/summary?reporting-window=${reportingWindow}`;
+    let data;
+  
+    try {
+      console.log('fetching data', url);
+  
+      const response = await fetch(url, {
+        headers: {
+          'Circle-Token': apiKey,
+        },
+      });
+  
+      if (!response.ok) {
+        throw new HTTPResponseError(response);
+      }
+  
+      data = await response.json();
+    } catch (error) {
+      if (CIRCLE_CI_INSIGHTS_SUMMARY_DEBUG) {
+        console.error(error); // avoid leaking the API key when logging the request object
+      }
+  
+      const body = await error.response.text();
+      throw new Error(`Failed to fetch summary from Circle CI: ${error.message}: ${body}`);
+    }
+  
+    console.log('raw data', JSON.stringify(data, null, 2));  
+  
+    const projectData = data.org_project_data.reduce((acc, { project_name, metrics, trends }) => {
+      acc[project_name] = { metrics, trends }
+      return acc;
+    }, {});
+    
+    const flattenedData = flatten({ object: { 
+      circleci: {
+        org_data: data.org_data, 
+        ...projectData 
+      }
+    }});
+  
+    console.log('flattened data', flattenedData);
+
+    for (const [key, value] of Object.entries(flattenedData)) {
+      core.setOutput(key, value);
+    }
+
+    core.setOutput('circleci.summary.json', JSON.stringify(flattenedData));
+    
+    console.log('✨ Done!');
+  } catch (error) {
+    console.error(error);
+    core.setFailed(`Failed to fetch or process Circle CI data: ${error.message}`);
+    throw error;
   }
-});
-
-console.log(flattened_data);
+})();
