@@ -1,0 +1,18 @@
+name: 'Fetch Circle CI Insights Summary'
+description: 'Fetches Insights Summary data from Circle CI using the V2 API'
+inputs:
+  api-key:
+    description: 'A valid Circle CI API key'
+    required: true
+  project-slug:
+    description: 'Progject slug in the form "vcs-slug/org-name/repo-name"'
+    required: true
+  reporting-window:
+    description: 'The time window used to calculate summary metrics (Enum: "last-7-days" "last-90-days" "last-24-hours" "last-30-days" "last-60-days")'
+    default: 'last-24-hours'
+outputs:
+  summary:
+    description: 'The fetched summary data'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
