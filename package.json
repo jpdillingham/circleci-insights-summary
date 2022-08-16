@@ -8,7 +8,8 @@
     "start": "node src/index.js",
     "watch": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf dist && ncc build src/index.js -o dist --license licenses.txt"
+    "clean": "rm -rf dist",
+    "build": "npm run clean && ncc build src/index.js -o dist --license licenses.txt"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@vercel/ncc": "^0.34.0",
+    "dotenv": "^16.0.1",
     "nodemon": "^2.0.19"
   }
 }
