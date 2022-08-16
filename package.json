@@ -1,0 +1,28 @@
+{
+  "name": "circleci-insights-summary",
+  "version": "1.0.0",
+  "description": "Fetches Insights Summary data from Circle CI",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "ncc build src/index.js --license licenses.txt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jpdillingham/circleci-insights-summary.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jpdillingham/circleci-insights-summary/issues"
+  },
+  "homepage": "https://github.com/jpdillingham/circleci-insights-summary#readme",
+  "dependencies": {
+    "@actions/core": "^1.9.1",
+    "@actions/github": "^5.0.3",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.34.0"
+  }
+}
