@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "Fetches Insights Summary data from Circle CI",
   "main": "index.js",
+  "type": "module",
   "scripts": {
+    "start": "node src/index.js",
+    "watch": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf dist && ncc build src/index.js -o dist --license licenses.txt"
   },
@@ -23,6 +26,7 @@
     "node-fetch": "^3.2.10"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.34.0"
+    "@vercel/ncc": "^0.34.0",
+    "nodemon": "^2.0.19"
   }
 }
