@@ -8,11 +8,18 @@ jobs:
     steps:
       - name: Fetch Circle CI Insights Summary
         id: fetch
-        uses: jpdillingham/circleci-insights-summary@v0.3
+        uses: jpdillingham/circleci-insights-summary@v0.5
         with:
           api-key: ${{ secrets.CIRCLE_CI_API_KEY }}
           project-slug: github/jpdillingham
           reporting-window: last-24-hours
-      # Use the output from the `hello` step
       - name: Dump output
-        run: echo {{ steps.fetch.outputs.circleci.summary.json }}
+        run: echo "summary ${{ steps.fetch.outputs.summary }}"
+      - name: Send metrics to Datadog
+        uses: masci/datadog@v1
+        with:
+          api-key: ${{ secrets.DATADOG_API_KEY }}
+          metrics: |
+            - type: "count"
+              name: "circleci.org_data.metrics.total_credits-used"
+              value: ${{ steps.fetch.outputs.org_data-metrics-total_credits_used }}
