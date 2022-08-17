@@ -6908,15 +6908,13 @@ const flatten = ({ object = {}, result = {}, path = '' }) => {
     }, {});
     
     const flattenedData = flatten({ object: { 
-      circleci: {
-        org_data: data.org_data, 
-        ...projectData,
-      }
+      org_data: data.org_data, 
+      ...projectData,
     }});
 
     const summarizedFlattenedData = {
       ...flattenedData,
-      'circleci.summary.json': JSON.stringify(flattenedData),
+      summary: JSON.stringify(flattenedData),
     }
   
     console.log('flattened data', summarizedFlattenedData);
