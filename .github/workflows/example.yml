@@ -15,4 +15,4 @@ jobs:
           reporting-window: last-24-hours
       # Use the output from the `hello` step
       - name: Dump output
-        run: echo "The time was ${{ steps.fetch.outputs.circleci.summary.json }}"
+        run: echo {{ steps.fetch.outputs.circleci.summary.json }}

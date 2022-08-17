@@ -6910,18 +6910,21 @@ const flatten = ({ object = {}, result = {}, path = '' }) => {
     const flattenedData = flatten({ object: { 
       circleci: {
         org_data: data.org_data, 
-        ...projectData 
+        ...projectData,
       }
     }});
-  
-    console.log('flattened data', flattenedData);
 
-    for (const [key, value] of Object.entries(flattenedData)) {
+    const summarizedFlattenedData = {
+      ...flattenedData,
+      'circleci.summary.json': JSON.stringify(flattenedData),
+    }
+  
+    console.log('flattened data', summarizedFlattenedData);
+
+    for (const [key, value] of Object.entries(summarizedFlattenedData)) {
       core.setOutput(key, value);
     }
-
-    core.setOutput('circleci.summary.json', JSON.stringify(flattenedData));
-    
+   
     console.log('✨ Done!');
   } catch (error) {
     console.error(error);
