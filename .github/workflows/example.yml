@@ -8,7 +8,7 @@ jobs:
     steps:
       - name: Fetch Circle CI Insights Summary
         id: fetch
-        uses: jpdillingham/circleci-insights-summary@v0.2
+        uses: jpdillingham/circleci-insights-summary@v0.3
         with:
           api-key: ${{ secrets.CIRCLE_CI_API_KEY }}
           project-slug: github/jpdillingham
